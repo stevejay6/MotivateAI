@@ -38,7 +38,7 @@ export default function QuoteCard({ quote }: QuoteCardProps) {
       <div className="relative p-6">
         <div className="mb-4">
           <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-white/30 text-gray-800 backdrop-blur-sm shadow-sm">
-            {getCategoryName(quote.categoryid)}
+            {quote.qcategory?.trim() || getCategoryName(quote.categoryid)}
           </span>
         </div>
         <p className="text-lg leading-relaxed mb-4 text-gray-800 font-medium">

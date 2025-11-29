@@ -2,6 +2,7 @@ export interface Quote {
   quoteid: number;
   categoryid: number;
   subcategoryid: number;
+  qcategory?: string | null;
   quotetext: string;
   author: string | null;
   created_at: string;
