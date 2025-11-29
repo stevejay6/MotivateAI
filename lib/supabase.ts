@@ -33,6 +33,7 @@ export async function getQuotesPaginated(
   offset: number = 0,
   search?: string,
   categoryId?: number | null,
+  qcategory?: string | null,
   random: boolean = false,
   randomSeed?: number
 ): Promise<QuotesApiResponse> {
@@ -48,6 +49,10 @@ export async function getQuotesPaginated(
 
     if (categoryId !== null && categoryId !== undefined) {
       params.append("categoryId", categoryId.toString());
+    }
+
+    if (qcategory) {
+      params.append("qcategory", qcategory);
     }
 
     if (random) {

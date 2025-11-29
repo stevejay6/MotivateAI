@@ -23,6 +23,11 @@ export async function GET(request: NextRequest) {
   const categoryId = searchParams.get("categoryId");
   const random = searchParams.get("random") === "true";
   const randomSeedParam = searchParams.get("randomSeed");
+  const qcategoryParam = searchParams.get("qcategory");
+  const qcategory =
+    qcategoryParam && qcategoryParam.trim().length > 0
+      ? qcategoryParam.trim()
+      : null;
   const parsedSeed = randomSeedParam ? parseInt(randomSeedParam, 10) : NaN;
   const randomSeed = Number.isFinite(parsedSeed) ? parsedSeed : Date.now();
 
@@ -37,6 +42,7 @@ export async function GET(request: NextRequest) {
         supabase,
         search,
         categoryId: categoryIdNum,
+        qcategory,
         limit,
         offset,
         randomSeed,
@@ -50,7 +56,11 @@ export async function GET(request: NextRequest) {
       .eq("is_active", true)
       .order("created_at", { ascending: false });
 
-    query = applyFilters(query, { search, categoryId: categoryIdNum });
+    query = applyFilters(query, {
+      search,
+      categoryId: categoryIdNum,
+      qcategory,
+    });
 
     // Apply pagination
     query = query.range(offset, offset + limit - 1);
@@ -86,9 +96,9 @@ type DefaultSupabaseClient = SupabaseClient<any, "public", any>;
 
 function applyFilters(
   query: any,
-  options: { search: string; categoryId: number | null }
+  options: { search: string; categoryId: number | null; qcategory: string | null }
 ) {
-  const { search, categoryId } = options;
+  const { search, categoryId, qcategory } = options;
   let updatedQuery = query;
 
   if (search) {
@@ -101,6 +111,10 @@ function applyFilters(
     updatedQuery = updatedQuery.eq("categoryid", categoryId);
   }
 
+  if (qcategory) {
+    updatedQuery = updatedQuery.eq("qcategory", qcategory);
+  }
+
   return updatedQuery;
 }
 
@@ -108,6 +122,7 @@ async function handleRandomQuotes({
   supabase,
   search,
   categoryId,
+  qcategory,
   limit,
   offset,
   randomSeed,
@@ -115,6 +130,7 @@ async function handleRandomQuotes({
   supabase: DefaultSupabaseClient;
   search: string;
   categoryId: number | null;
+  qcategory: string | null;
   limit: number;
   offset: number;
   randomSeed: number;
@@ -124,7 +140,7 @@ async function handleRandomQuotes({
     .select("quoteid")
     .eq("is_active", true);
 
-  idQuery = applyFilters(idQuery, { search, categoryId });
+  idQuery = applyFilters(idQuery, { search, categoryId, qcategory });
 
   const { data: idData, error: idError } = await idQuery;
 

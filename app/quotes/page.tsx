@@ -1,138 +1,67 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Quote, categoryIdToName } from "@/lib/types";
+import { Quote } from "@/lib/types";
 import QuoteCard from "@/components/QuoteCard";
-import CategoryChips from "@/components/CategoryChips";
+import QCategoryButtons from "@/components/QCategoryButtons";
 import SearchBar from "@/components/SearchBar";
-import { getQuotesPaginated, getCategories } from "@/lib/supabase";
+import { getQuotesPaginated } from "@/lib/supabase";
 
 export default function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-    null
-  );
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [availableCategoryIds, setAvailableCategoryIds] = useState<number[]>(
-    []
-  );
+  const [selectedQCategory, setSelectedQCategory] = useState<string | null>(null);
   const [randomSeed, setRandomSeed] = useState<number>(() => Date.now());
 
-  // Fetch categories on mount
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const data = await getCategories();
-        // Populate categoryIdToName mapping
-        data.forEach((cat) => {
-          categoryIdToName[cat.categoryid] = cat.categoryname;
-        });
-        // Get unique category IDs from categories that have quotes
-        const categoryIds = data.map((cat) => cat.categoryid);
-        setAvailableCategoryIds(categoryIds);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    }
-    fetchCategories();
-  }, []);
-
-  // Fetch quotes function
-  const fetchQuotes = useCallback(
-    async (reset: boolean = false, currentOffset?: number) => {
-      const offsetToUse = reset ? 0 : currentOffset ?? offset;
-      const isInitialLoad = reset;
-
-      if (isInitialLoad) {
-        setLoading(true);
-      } else {
-        setLoadingMore(true);
-      }
-
-      try {
-        // Use random ordering when "All" is selected (selectedCategoryId is null)
-        const useRandom = selectedCategoryId === null;
-        const response = await getQuotesPaginated(
-          25,
-          offsetToUse,
-          searchQuery || undefined,
-          selectedCategoryId,
-          useRandom,
-          useRandom ? randomSeed : undefined
-        );
-
-        if (reset) {
-          setQuotes(response.quotes);
-          setOffset(response.quotes.length);
-        } else {
-          setQuotes((prev) => [...prev, ...response.quotes]);
-          setOffset((prev) => prev + response.quotes.length);
-        }
-
-        setHasMore(response.hasMore);
-      } catch (error) {
-        console.error("Error fetching quotes:", error);
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [searchQuery, selectedCategoryId, offset, randomSeed]
-  );
-
   // Handle category selection, generating a new random seed whenever "All" is chosen
-  const handleCategorySelect = useCallback(
-    (categoryId: number | null) => {
-      if (categoryId === null) {
+  const handleQCategorySelect = useCallback(
+    (qcategory: string | null) => {
+      if (qcategory === null) {
         const nextSeed = Date.now() + Math.floor(Math.random() * 1000);
         setRandomSeed(nextSeed);
       }
-      setSelectedCategoryId(categoryId);
+      setSelectedQCategory(qcategory);
     },
     []
   );
 
   // Initial load and when filters change
   useEffect(() => {
+    let isCancelled = false;
+    setLoading(true);
+
     async function loadQuotes() {
-      setOffset(0);
-      const offsetToUse = 0;
-      const isInitialLoad = true;
-
-      setLoading(true);
-
       try {
-        // Use random ordering when "All" is selected (selectedCategoryId is null)
-        const useRandom = selectedCategoryId === null;
+        // Use random ordering when "All" is selected (selectedQCategory is null)
+        const useRandom = selectedQCategory === null;
         const response = await getQuotesPaginated(
           25,
-          offsetToUse,
+          0,
           searchQuery || undefined,
-          selectedCategoryId,
+          null,
+          selectedQCategory,
           useRandom,
           useRandom ? randomSeed : undefined
         );
 
-        setQuotes(response.quotes);
-        setOffset(response.quotes.length);
-        setHasMore(response.hasMore);
+        if (!isCancelled) {
+          setQuotes(response.quotes);
+        }
       } catch (error) {
         console.error("Error fetching quotes:", error);
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadQuotes();
-  }, [searchQuery, selectedCategoryId, randomSeed]);
-
-  const handleLoadMore = useCallback(() => {
-    fetchQuotes(false, offset);
-  }, [fetchQuotes, offset]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [searchQuery, selectedQCategory, randomSeed]);
 
   if (loading) {
     return (
@@ -157,18 +86,16 @@ export default function QuotesPage() {
 
         <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
-        <CategoryChips
-          availableCategoryIds={availableCategoryIds}
-          selectedCategoryId={selectedCategoryId}
-          onCategorySelect={handleCategorySelect}
-          categoryIdToName={categoryIdToName}
+        <QCategoryButtons
+          selectedQCategory={selectedQCategory}
+          onSelect={handleQCategorySelect}
         />
 
         <div className="space-y-6">
           {quotes.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
-                {searchQuery || selectedCategoryId
+                {searchQuery || selectedQCategory
                   ? "No quotes found matching your criteria."
                   : "No quotes available. Add some quotes to your Supabase database."}
               </p>
@@ -180,28 +107,15 @@ export default function QuotesPage() {
           )}
         </div>
 
-        {hasMore && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loadingMore ? (
-                <span className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Loading...
-                </span>
-              ) : (
-                "Load More Quotes"
-              )}
-            </button>
-          </div>
-        )}
-
-        {quotes.length > 0 && !hasMore && (
-          <div className="mt-8 text-center text-gray-500 text-sm">
-            Showing all {quotes.length} quotes
+        {quotes.length > 0 && (
+          <div className="mt-8">
+            <QCategoryButtons
+              selectedQCategory={selectedQCategory}
+              onSelect={handleQCategorySelect}
+            />
+            <p className="text-center text-gray-500 text-sm mt-4">
+              Want something different? Pick another topic above or below.
+            </p>
           </div>
         )}
       </div>
