@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SiteNavDropdown from "@/components/SiteNavDropdown";
 
 export const metadata: Metadata = {
   title: "Quotes Discovery",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <SiteNavDropdown />
+        {children}
+      </body>
     </html>
   );
 }

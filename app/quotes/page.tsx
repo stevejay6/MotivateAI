@@ -6,6 +6,7 @@ import QuoteCard from "@/components/QuoteCard";
 import QCategoryButtons from "@/components/QCategoryButtons";
 import SearchBar from "@/components/SearchBar";
 import { getQuotesPaginated } from "@/lib/supabase";
+import Link from "next/link";
 
 export default function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -82,6 +83,15 @@ export default function QuotesPage() {
             Quotes Discovery
           </h1>
           <p className="text-gray-600">Find inspiration in every word</p>
+          <p className="text-sm text-gray-500 mt-3">
+            Want daily affirmations?{" "}
+            <Link
+              href="/iaffirmations"
+              className="text-purple-600 font-semibold hover:text-purple-700 underline"
+            >
+              Visit I - Affirmations
+            </Link>
+          </p>
         </div>
 
         <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
@@ -115,6 +125,15 @@ export default function QuotesPage() {
             />
             <p className="text-center text-gray-500 text-sm mt-4">
               Want something different? Pick another topic above or below.
+            </p>
+            <p className="text-center text-sm text-purple-600 mt-2">
+              Ready for more mindful mantras?{" "}
+              <Link
+                href="/iaffirmations"
+                className="font-semibold underline hover:text-purple-700"
+              >
+                Open I - Affirmations
+              </Link>
             </p>
           </div>
         )}

@@ -1,5 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
-import { Quote, QuotesApiResponse, Category } from "./types";
+import {
+  Quote,
+  QuotesApiResponse,
+  Category,
+  AffirmationsApiResponse,
+} from "./types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -89,6 +94,49 @@ export async function getCategories(): Promise<Category[]> {
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
+  }
+}
+
+export async function getAffirmationsPaginated(
+  limit: number = 25,
+  offset: number = 0,
+  search?: string,
+  icategoryName?: string | null,
+  random: boolean = false,
+  randomSeed?: number
+): Promise<AffirmationsApiResponse> {
+  try {
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      offset: offset.toString(),
+    });
+
+    if (search) {
+      params.append("search", search);
+    }
+
+    if (icategoryName) {
+      params.append("icategory", icategoryName);
+    }
+
+    if (random) {
+      params.append("random", "true");
+      if (randomSeed !== undefined) {
+        params.append("randomSeed", randomSeed.toString());
+      }
+    }
+
+    const response = await fetch(`/api/affirmations?${params.toString()}`);
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch affirmations");
+    }
+
+    const data: AffirmationsApiResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching affirmations:", error);
+    return { affirmations: [], hasMore: false };
   }
 }
 

@@ -29,6 +29,22 @@ export interface QuotesApiResponse {
   total?: number;
 }
 
+export interface Affirmation {
+  iaffid: number;
+  icategoryid: number;
+  quotetext: string;
+  icategory?: string | null;
+  icategoryname?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AffirmationsApiResponse {
+  affirmations: Affirmation[];
+  hasMore: boolean;
+  total?: number;
+}
+
 // Category mapping structure - populated dynamically from API
 export const categoryIdToName: Record<number, string> = {};
 
