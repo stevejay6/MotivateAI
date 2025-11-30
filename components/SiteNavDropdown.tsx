@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: "/quotes", label: "Quotes Discovery" },
   { href: "/iaffirmations", label: "I - Affirmations" },
   { href: "/you-affirmations", label: "You - Affirmations" },
+  { href: "/ai-journal", label: "AI Journal" },
 ];
 
 export default function SiteNavDropdown() {
