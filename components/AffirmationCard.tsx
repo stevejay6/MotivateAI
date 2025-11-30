@@ -1,7 +1,11 @@
-import { Affirmation } from "@/lib/types";
+import { Affirmation, YouAffirmation } from "@/lib/types";
+
+type AffirmationLike = Pick<Affirmation, "quotetext"> &
+  Partial<Affirmation> &
+  Partial<YouAffirmation>;
 
 interface AffirmationCardProps {
-  affirmation: Affirmation;
+  affirmation: AffirmationLike;
   categoryLabel?: string | null;
 }
 
@@ -16,8 +20,12 @@ export default function AffirmationCard({
     categoryLabel?.trim() ||
     affirmation.icategory?.trim() ||
     affirmation.icategoryname?.trim() ||
+    affirmation.ucategory?.trim() ||
+    affirmation.ucategoryname?.trim() ||
     (affirmation.icategoryid
       ? `Category ${affirmation.icategoryid}`
+      : affirmation.ucategoryid
+      ? `Category ${affirmation.ucategoryid}`
       : "Affirmation");
 
   return (

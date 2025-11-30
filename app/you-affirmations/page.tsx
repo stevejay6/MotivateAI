@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 import AffirmationCategoryButtons from "@/components/AffirmationCategoryButtons";
 import AffirmationCard from "@/components/AffirmationCard";
-import { getAffirmationsPaginated } from "@/lib/supabase";
-import { Affirmation } from "@/lib/types";
-import Link from "next/link";
+import { getYouAffirmationsPaginated } from "@/lib/supabase";
+import { YouAffirmation } from "@/lib/types";
 
-export default function IAffirmationsPage() {
-  const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
+export default function YouAffirmationsPage() {
+  const [affirmations, setAffirmations] = useState<YouAffirmation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export default function IAffirmationsPage() {
     async function loadAffirmations() {
       try {
         const useRandom = true;
-        const response = await getAffirmationsPaginated(
+        const response = await getYouAffirmationsPaginated(
           25,
           0,
           searchQuery || undefined,
@@ -40,7 +40,7 @@ export default function IAffirmationsPage() {
           setAffirmations(response.affirmations);
         }
       } catch (error) {
-        console.error("Error fetching affirmations:", error);
+        console.error("Error fetching you-affirmations:", error);
       } finally {
         if (!isCancelled) {
           setLoading(false);
@@ -71,18 +71,26 @@ export default function IAffirmationsPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center space-y-2">
-          <h1 className="text-4xl font-bold text-gray-800">I - Affirmations</h1>
+          <h1 className="text-4xl font-bold text-gray-800">You - Affirmations</h1>
           <p className="text-gray-600">
             Uplifting words curated for every part of your journey.
           </p>
           <p className="text-sm text-gray-500">
-            Looking for quotes instead?{" "}
+            Looking for more inspiration?{" "}
             <Link
               href="/quotes"
               className="text-purple-600 font-semibold hover:text-purple-700 underline"
             >
               Visit Quotes Discovery
+            </Link>{" "}
+            or{" "}
+            <Link
+              href="/iaffirmations"
+              className="text-purple-600 font-semibold hover:text-purple-700 underline"
+            >
+              explore I - Affirmations
             </Link>
+            .
           </p>
         </div>
 
@@ -109,9 +117,13 @@ export default function IAffirmationsPage() {
           ) : (
             affirmations.map((affirmation) => (
               <AffirmationCard
-                key={affirmation.iaffid}
-                affirmation={affirmation}
-                categoryLabel={affirmation.icategoryname || affirmation.icategory}
+                key={affirmation.uaffid}
+                affirmation={{
+                  ...affirmation,
+                  iaffid: 0,
+                  icategoryid: 0,
+                }}
+                categoryLabel={affirmation.ucategoryname || affirmation.ucategory}
               />
             ))
           )}

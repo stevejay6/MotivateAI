@@ -45,6 +45,22 @@ export interface AffirmationsApiResponse {
   total?: number;
 }
 
+export interface YouAffirmation {
+  uaffid: number;
+  ucategoryid: number;
+  quotetext: string;
+  ucategory?: string | null;
+  ucategoryname?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface YouAffirmationsApiResponse {
+  affirmations: YouAffirmation[];
+  hasMore: boolean;
+  total?: number;
+}
+
 // Category mapping structure - populated dynamically from API
 export const categoryIdToName: Record<number, string> = {};
 

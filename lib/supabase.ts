@@ -4,6 +4,7 @@ import {
   QuotesApiResponse,
   Category,
   AffirmationsApiResponse,
+  YouAffirmationsApiResponse,
 } from "./types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -136,6 +137,51 @@ export async function getAffirmationsPaginated(
     return data;
   } catch (error) {
     console.error("Error fetching affirmations:", error);
+    return { affirmations: [], hasMore: false };
+  }
+}
+
+export async function getYouAffirmationsPaginated(
+  limit: number = 25,
+  offset: number = 0,
+  search?: string,
+  icategoryName?: string | null,
+  random: boolean = false,
+  randomSeed?: number
+): Promise<YouAffirmationsApiResponse> {
+  try {
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      offset: offset.toString(),
+    });
+
+    if (search) {
+      params.append("search", search);
+    }
+
+    if (icategoryName) {
+      params.append("icategory", icategoryName);
+    }
+
+    if (random) {
+      params.append("random", "true");
+      if (randomSeed !== undefined) {
+        params.append("randomSeed", randomSeed.toString());
+      }
+    }
+
+    const response = await fetch(
+      `/api/you-affirmations?${params.toString()}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch you-affirmations");
+    }
+
+    const data: YouAffirmationsApiResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching you-affirmations:", error);
     return { affirmations: [], hasMore: false };
   }
 }
