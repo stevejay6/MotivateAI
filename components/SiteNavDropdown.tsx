@@ -1,16 +1,25 @@
-"use client";
+'use client';
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { BookOpen } from "lucide-react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/quotes", label: "Quotes Discovery" },
-  { href: "/iaffirmations", label: "I - Affirmations" },
-  { href: "/you-affirmations", label: "You - Affirmations" },
-  { href: "/ai-journal", label: "AI Journal" },
-  { href: "/my-inspirations", label: "My Inspirations" },
-  { href: "/journal", label: "Journal" },
+type NavLink = {
+  href: string;
+  label: string;
+  icon?: ComponentType<{ className?: string }>;
+};
+
+const NAV_LINKS: NavLink[] = [
+  { href: '/', label: 'Home' },
+  { href: '/quotes', label: 'Quotes Discovery' },
+  { href: '/iaffirmations', label: 'I - Affirmations' },
+  { href: '/you-affirmations', label: 'You - Affirmations' },
+  { href: '/ai-journal', label: 'AI Journal' },
+  { href: '/my-inspirations', label: 'My Inspirations' },
+  { href: '/journal', label: 'Journal' },
+  { href: '/emotional-coach', label: 'Emotional Coach' },
+  { href: '/ai-kick-in-the-pants', label: 'AI Kick in the Pants', icon: BookOpen },
 ];
 
 export default function SiteNavDropdown() {
@@ -56,17 +65,18 @@ export default function SiteNavDropdown() {
       </button>
       {open && (
         <ul
-          className="mt-2 w-48 rounded-xl bg-white/95 border border-gray-200 shadow-lg backdrop-blur"
+          className="mt-2 w-52 rounded-xl bg-white/95 border border-gray-200 shadow-lg backdrop-blur"
           role="listbox"
         >
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="block px-4 py-2 hover:bg-purple-50 rounded-xl transition-colors"
+                className="flex items-center gap-2 px-4 py-2 hover:bg-purple-50 rounded-xl transition-colors"
                 onClick={() => setOpen(false)}
               >
-                {link.label}
+                {link.icon && <link.icon className="h-4 w-4 text-gray-600" />}
+                <span>{link.label}</span>
               </Link>
             </li>
           ))}

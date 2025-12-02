@@ -1,52 +1,65 @@
 import { render, screen } from "@testing-library/react";
-import { JournalStats } from "@/app/journal/page";
-import { JournalEntry } from "@/utils/journalApi";
+import { format, subDays } from "date-fns";
 
-const entries: JournalEntry[] = [
-  {
-    id: "1",
-    date: "2025-11-30",
-    mood: "good",
-    gratitude: ["focus"],
-    highlights: "Deep work",
-    reflection: "Flow day",
-  },
-  {
-    id: "2",
-    date: "2025-11-29",
-    mood: "good",
-    gratitude: ["family"],
-    highlights: "Call home",
-    reflection: "Rested",
-  },
-  {
-    id: "3",
-    date: "2025-11-28",
-    mood: "amazing",
-    gratitude: ["team"],
-    highlights: "Launch day",
-    reflection: "Grateful",
-  },
-];
+import type { JournalEntry } from "@/app/ai-kick-in-the-pants/types";
+import { JournalStats } from "@/components/JournalStats";
 
 describe("JournalStats", () => {
-  it("shows total entries count", () => {
-    render(<JournalStats entries={entries} isLoading={false} />);
-    const totalCard = screen.getByTestId("stats-total-entries");
-    expect(totalCard).toHaveTextContent("3");
+  it("renders zero states when no entries exist", () => {
+    render(<JournalStats entries={[]} isLoading={false} />);
+
+    expect(screen.getByText("0-day streak")).toBeInTheDocument();
+    expect(screen.getByText("No entries yet")).toBeInTheDocument();
+    expect(screen.getByText(/Share your gratitude/)).toBeInTheDocument();
+
+    const moodBars = screen.getAllByTestId("mood-bar");
+    expect(moodBars).toHaveLength(5);
   });
 
-  it("renders most common mood icon with correct color", () => {
-    render(<JournalStats entries={entries} isLoading={false} />);
-    const icon = screen.getByTestId("mood-icon");
-    expect(icon).toHaveClass("text-green-500");
-  });
+  it("displays stats for existing entries", () => {
+    const today = format(new Date(), "yyyy-MM-dd");
+    const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
+    const threeDaysAgo = format(subDays(new Date(), 3), "yyyy-MM-dd");
 
-  it("exposes mood distribution percentages", () => {
+    const entries: JournalEntry[] = [
+      {
+        id: "1",
+        date: today,
+        mood: "good",
+        gratitude: ["coffee", "sunshine"],
+        highlights: "Launch day",
+        reflection: "Proud of the work",
+      },
+      {
+        id: "2",
+        date: yesterday,
+        mood: "good",
+        gratitude: ["team"],
+        highlights: "Great standup",
+        reflection: "Motivated",
+      },
+      {
+        id: "3",
+        date: threeDaysAgo,
+        mood: "amazing",
+        gratitude: ["family"],
+        highlights: "Celebrated together",
+        reflection: "Feeling loved",
+      },
+    ];
+
     render(<JournalStats entries={entries} isLoading={false} />);
-    const bar = screen.getByTestId("mood-bar-good");
-    expect(bar).toHaveAttribute("data-percentage", "67");
+
+    expect(screen.getByText("3")).toBeInTheDocument(); // total entries
+    expect(screen.getByText("2-day streak")).toBeInTheDocument();
+    expect(screen.getAllByText(/good/i).length).toBeGreaterThan(0); // most common mood
+
+    const moodBars = screen.getAllByTestId("mood-bar");
+    expect(moodBars).toHaveLength(5);
+
+    const goodBar = moodBars.find((bar) => bar.getAttribute("data-mood") === "good");
+    const difficultBar = moodBars.find((bar) => bar.getAttribute("data-mood") === "difficult");
+    expect(goodBar?.querySelector("[data-width]")?.getAttribute("data-width")).toBe("100");
+    expect(difficultBar?.querySelector("[data-width]")?.getAttribute("data-width")).toBe("0");
   });
 });
-
-
