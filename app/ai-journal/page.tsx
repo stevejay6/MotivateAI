@@ -141,14 +141,7 @@ export default function AIJournalPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    aiMessageCount,
-    inputMessage,
-    isLoading,
-    messages,
-    sendAIMessage,
-    sessionComplete,
-  ]);
+  }, [inputMessage, isLoading, messages, sendAIMessage, sessionComplete]);
 
   const resetSession = useCallback(() => {
     setMessages([]);

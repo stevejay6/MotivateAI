@@ -59,7 +59,7 @@ export default function EmotionalCoachPage() {
           </h1>
 
           <p className="text-base text-rose-900/70">
-            Share what's on your heart. I'm here to listen, support, and guide you with empathy.
+            Share what&apos;s on your heart. I&apos;m here to listen, support, and guide you with empathy.
           </p>
         </motion.div>
 
@@ -157,7 +157,7 @@ export default function EmotionalCoachPage() {
                 {sessionComplete && (
                   <div className="rounded-2xl border border-rose-100/80 bg-rose-50/70 p-4 text-center text-rose-900/80">
                     <p className="text-sm">
-                      You've completed this coaching session. Whenever you're ready, you can begin a new space for reflection.
+                      You&apos;ve completed this coaching session. Whenever you&apos;re ready, you can begin a new space for reflection.
                     </p>
                     <Button
                       className="mt-4 inline-flex items-center gap-2 bg-white text-rose-600 hover:bg-rose-100"
@@ -189,7 +189,7 @@ export default function EmotionalCoachPage() {
               </label>
               <Textarea
                 id="emotional-coach-input"
-                placeholder="Share what you're feeling..."
+                placeholder="Share what you&apos;re feeling..."
                 className="min-h-[140px] resize-none border-rose-100/80 bg-white/80 text-base focus-visible:ring-rose-200"
                 value={inputMessage}
                 onChange={(event) => setInputMessage(event.target.value)}

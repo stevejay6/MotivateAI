@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Flame, Mic2 } from "lucide-react";
 import { useEffect, useRef, useState, type ComponentType } from "react";
 
 type NavLink = {
@@ -20,6 +20,8 @@ const NAV_LINKS: NavLink[] = [
   { href: '/journal', label: 'Journal' },
   { href: '/emotional-coach', label: 'Emotional Coach' },
   { href: '/ai-kick-in-the-pants', label: 'AI Kick in the Pants', icon: BookOpen },
+  { href: '/ai-motivate-me-now', label: 'AI Motivate Me Now', icon: Flame },
+  { href: '/ai-speeches', label: 'AI Speeches', icon: Mic2 },
 ];
 
 export default function SiteNavDropdown() {
