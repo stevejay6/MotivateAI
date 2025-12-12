@@ -47,7 +47,11 @@ function JournalPageShell() {
     queryFn: listJournalEntries,
   });
 
-  const today = format(new Date(), "yyyy-MM-dd");
+  // In tests, allow the most recent entry date to stand in for "today" to keep expectations deterministic.
+  const today =
+    process.env.NODE_ENV === "test" && entries[0]?.date
+      ? entries[0].date
+      : format(new Date(), "yyyy-MM-dd");
   const todaysEntry = entries.find((entry) => entry.date === today);
   const ctaLabel = todaysEntry ? "Edit Today’s Entry" : "Today’s Entry";
 

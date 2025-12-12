@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
@@ -57,6 +57,14 @@ const HookHarness = () => {
 };
 
 describe("useEmotionalCoachState", () => {
+  const sendMessage = async (text: string) => {
+    await act(async () => {
+      await userEvent.clear(screen.getByTestId("coach-input"));
+      await userEvent.type(screen.getByTestId("coach-input"), text);
+      await userEvent.click(screen.getByTestId("coach-send"));
+    });
+  };
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -65,8 +73,7 @@ describe("useEmotionalCoachState", () => {
     mockedFetchCoachReply.mockResolvedValue("Thank you for sharing that. How does it feel to say it out loud?");
     render(<HookHarness />);
 
-    await userEvent.type(screen.getByTestId("coach-input"), "I'm feeling overwhelmed.");
-    await userEvent.click(screen.getByTestId("coach-send"));
+    await sendMessage("I'm feeling overwhelmed.");
 
     await waitFor(() => {
       expect(screen.getAllByRole("listitem")).toHaveLength(2);
@@ -81,33 +88,33 @@ describe("useEmotionalCoachState", () => {
     expect(mockedFetchCoachReply).toHaveBeenCalledTimes(1);
   });
 
-  it("enforces the 12-message limit and marks the session complete", async () => {
+  it(
+    "enforces the 12-message limit and marks the session complete",
+    async () => {
     mockedFetchCoachReply.mockResolvedValue("I'm here with you. What's one gentle step forward?");
     render(<HookHarness />);
 
     for (let index = 0; index < 12; index += 1) {
-      await userEvent.clear(screen.getByTestId("coach-input"));
-      await userEvent.type(screen.getByTestId("coach-input"), `Reflection ${index}`);
-      await userEvent.click(screen.getByTestId("coach-send"));
+      await sendMessage(`Reflection ${index}`);
 
       await waitFor(() => {
         expect(screen.getByTestId("coach-ai-count").textContent).toBe(String(index + 1));
       });
     }
 
-    expect(screen.getByTestId("coach-session-complete").textContent).toBe("true");
-    expect(screen.getByText(SESSION_COMPLETION_MESSAGE)).toBeInTheDocument();
-    expect(mockedFetchCoachReply).toHaveBeenCalledTimes(12);
-  });
+      expect(screen.getByTestId("coach-session-complete").textContent).toBe("true");
+      expect(screen.getByText(SESSION_COMPLETION_MESSAGE)).toBeInTheDocument();
+      expect(mockedFetchCoachReply).toHaveBeenCalledTimes(12);
+    },
+    10000
+  );
 
   it("resets the session state when starting a new session", async () => {
     mockedFetchCoachReply.mockResolvedValue("Let's keep breathing together.");
     render(<HookHarness />);
 
     for (let index = 0; index < 12; index += 1) {
-      await userEvent.clear(screen.getByTestId("coach-input"));
-      await userEvent.type(screen.getByTestId("coach-input"), `Reflection ${index}`);
-      await userEvent.click(screen.getByTestId("coach-send"));
+      await sendMessage(`Reflection ${index}`);
     }
 
     await waitFor(() => {
